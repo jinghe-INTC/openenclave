@@ -64,7 +64,8 @@ oe_result_t enclave_identity_verifier(oe_identity_t* identity, void* arg)
 
 static bool _validate_file(const char* filename, bool assert)
 {
-    FILE* fp = fopen(filename, "rb");
+    FILE* fp;
+    fopen_s(&fp, filename, "rb");
 
     if (assert)
         OE_TEST(fp != NULL);
@@ -85,7 +86,7 @@ static oe_result_t _verify_cert(const char* filename, bool pass)
 
     OE_TRACE_INFO("\n\nLoading and verifying %s\n\n", filename);
 
-    fp = fopen(filename, "rb");
+    fopen_s(&fp, filename, "rb");
     OE_TEST(fp != NULL);
 
     bytes_read = fread(buf, sizeof(uint8_t), sizeof(buf), fp);
@@ -129,7 +130,8 @@ static void _read_binary_file(
     uint8_t** data_ptr,
     size_t* size_ptr)
 {
-    FILE* fp = fopen(filename, "rb");
+    FILE* fp;
+    fopen_s(&fp, filename, "rb");
     size_t size = 0;
     uint8_t* data = NULL;
 

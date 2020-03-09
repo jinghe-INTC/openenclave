@@ -111,7 +111,7 @@ static oe_result_t _gen_cert(
         FILE* file = NULL;
 
         printf("Creating certificate file: %s\n", out_filename);
-        file = fopen(out_filename, "wb");
+        fopen_s(&file, out_filename, "wb");
         if (file == NULL)
         {
             printf("Failed to open file: %s\n", out_filename);
@@ -162,7 +162,7 @@ static oe_result_t _gen_report(
         // Write report to file
         {
             FILE* output = NULL;
-            output = fopen(report_filename, "wb");
+            fopen_s(&output, report_filename, "wb");
             if (!output)
             {
                 printf("Failed to open report file %s\n", report_filename);
@@ -200,8 +200,7 @@ static oe_result_t _gen_report(
             uint8_t* collaterals = NULL;
             size_t collaterals_size = 0;
             oe_report_header_t* header = (oe_report_header_t*)remote_report;
-
-            sprintf(collateral_filename, "%s.col", report_filename);
+            sprintf_s(collateral_filename, sizeof(collateral_filename), "%s.col", report_filename);
             printf("Generatting collateral file: %s\n", collateral_filename);
 
             result = oe_get_sgx_endorsements(
@@ -215,8 +214,8 @@ static oe_result_t _gen_report(
                 result = OE_FAILURE;
                 goto exit;
             }
-
-            FILE* col_fp = fopen(collateral_filename, "wb");
+            FILE* col_fp;
+            fopen_s(&col_fp, collateral_filename, "wb");
             if (!col_fp)
             {
                 printf(
@@ -281,7 +280,8 @@ static int _parse_args(int argc, const char* argv[])
     _params.out_filename = "out.bin";
 
     // Verify enclave file is valid
-    FILE* fp = fopen(_params.enclave_filename, "rb");
+    FILE* fp;
+    fopen_s(&fp, _params.enclave_filename, "rb");
     if (!fp)
     {
         printf("Failed to find file: %s\n", _params.enclave_filename);
@@ -361,7 +361,8 @@ static int _parse_args(int argc, const char* argv[])
 
 static oe_result_t _read_key(const char* filename, uint8_t** data, size_t* size)
 {
-    FILE* fp = fopen(filename, "rb");
+    FILE* fp;
+    fopen_s(&fp, filename, "rb");
     size_t file_size;
     oe_result_t result = OE_FAILURE;
     uint8_t* memory = NULL;
