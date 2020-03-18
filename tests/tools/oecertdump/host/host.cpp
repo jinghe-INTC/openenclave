@@ -191,7 +191,8 @@ static int _parse_args(int argc, const char* argv[])
     _params.out_filename = DEFAULT_OUTPUTFILE;
 
     // Verify enclave file is valid
-    FILE* fp = fopen(_params.enclave_filename, "rb");
+    FILE* fp;
+    fopen_s(&fp, _params.enclave_filename, "rb");
     if (!fp)
     {
         printf("Failed to find file: %s\n", _params.enclave_filename);
@@ -284,7 +285,7 @@ int main(int argc, const char* argv[])
     }
 
     // Create log file
-    log_file = fopen(_params.out_filename, "w");
+    fopen_s(&log_file, _params.out_filename, "w");
     if (!log_file)
     {
         printf("Failed to open log file %s\n", _params.out_filename);

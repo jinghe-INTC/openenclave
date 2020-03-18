@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <fcntl.h>
+#include <io.h>
 #include <openenclave/host.h>
 #include <openenclave/internal/trace.h>
 #include <stdio.h>
@@ -13,20 +14,27 @@
 
 int mbed_test_open(const char* path, int flags, mode_t mode)
 {
-    return open(path, flags, mode);
+#if defined(_WIN32)
+#pragma warning(disable : 4996)
+#pragma warning(push)
+#endif
+    return _open(path, flags, mode);
+#if defined(_WIN32)
+#pragma warning(pop)
+#endif
 }
 
 ssize_t mbed_test_read(int fd, char* buf, size_t buf_len)
 {
-    return read(fd, buf, buf_len);
+    return _read(fd, buf, (int)buf_len);
 }
 
 int mbed_test_close(int fd)
 {
-    return close(fd);
+    return _close(fd);
 }
 
 int mbed_test_lseek(int fd, int offset, int whence)
 {
-    return lseek(fd, offset, whence);
+    return _lseek(fd, offset, whence);
 }

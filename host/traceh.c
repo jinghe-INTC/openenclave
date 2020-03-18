@@ -3,6 +3,7 @@
 
 #include <openenclave/corelibc/limits.h>
 #include <openenclave/internal/calls.h>
+#include <openenclave/internal/datetime.h>
 #include <openenclave/internal/raise.h>
 #include <openenclave/internal/safecrt.h>
 #include <openenclave/internal/trace.h>
@@ -201,8 +202,11 @@ static bool _escape_characters(
                         log_msg_escaped[idx] = '\0';
                         return false;
                     }
-                    sprintf(
-                        (char*)&log_msg_escaped[idx], "u%04hhx", log_msg[i]);
+                    sprintf_s(
+                        (char*)&log_msg_escaped[idx],
+                        msg_size - idx,
+                        "u%04hhx",
+                        log_msg[i]);
                     // idx is also incremented after switch case
                     idx += MAX_ESCAPED_CHAR_LEN - 1;
                     break;
@@ -310,23 +314,14 @@ done:
 void oe_log_message(bool is_enclave, oe_log_level_t level, const char* message)
 {
     // get timestamp for log
-#if defined(__linux__)
-    struct timeval time_now;
-    gettimeofday(&time_now, NULL);
-    struct tm* t = gmtime(&time_now.tv_sec);
-#else
+    struct tm t;
     time_t lt = time(NULL);
-    struct tm* t = gmtime(&lt);
-#endif
+    gmtime_r(&lt, &t);
 
     char time[20];
-    strftime(time, sizeof(time), "%Y-%m-%dT%H:%M:%S", t);
+    strftime(time, sizeof(time), "%Y-%m-%dT%H:%M:%S", &t);
 
-#if defined(__linux__)
-    long int usecs = time_now.tv_usec;
-#else
     long int usecs = 0;
-#endif
     if (!_initialized)
     {
         initialize_log_config();

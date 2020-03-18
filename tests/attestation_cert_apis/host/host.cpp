@@ -1,6 +1,8 @@
 // Copyright (c) Open Enclave SDK contributors.
 // Licensed under the MIT License.
 
+#define FILENAME_LENGTH 80
+
 #include <limits.h>
 #include <openenclave/host.h>
 #include <openenclave/internal/error.h>
@@ -92,16 +94,17 @@ void run_test(oe_enclave_t* enclave, int test_type)
 
     {
         // for testing purpose, output the whole cer in DER format
-        char filename[80];
+        char filename[FILENAME_LENGTH];
         FILE* file = NULL;
 
-        sprintf(
+        sprintf_s(
             filename,
+            sizeof(filename),
             "./cert_%s.der",
             test_type == TEST_RSA_KEY ? "rsa" : "ec");
         OE_TRACE_INFO(
             "Host: Log quote embedded certificate to file: [%s]\n", filename);
-        file = fopen(filename, "wb");
+        fopen_s(&file, filename, "wb");
         fwrite(cert, 1, cert_size, file);
         fclose(file);
     }

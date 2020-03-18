@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <fcntl.h>
+#include <io.h>
 #include <limits.h>
 #include <openenclave/host.h>
 #include <openenclave/internal/error.h>
@@ -38,9 +39,12 @@ int f_open(char* path, int flags, int mode)
      * also processed as binary (as they would be equivalently on Linux).
      */
     flags |= _O_BINARY;
-    return _open(path, flags, mode);
-#else
+#pragma warning(disable : 4996)
+#pragma warning(push)
+#endif
     return open(path, flags, mode);
+#if defined(_WIN32)
+#pragma warning(pop)
 #endif
 }
 
@@ -55,20 +59,12 @@ int f_openat(int dirfd, char* path, int flags, int mode)
 
 int f_read(int fd, char* ptr, size_t len)
 {
-#if defined(_WIN32)
-    return (int)_read(fd, ptr, len);
-#else
-    return (int)read(fd, ptr, len);
-#endif
+    return (int)read(fd, ptr, (int)len);
 }
 
 int f_close(int fd)
 {
-#if (defined(_WIN32))
-    return _close(fd);
-#else
     return close(fd);
-#endif
 }
 
 int main(int argc, const char* argv[])

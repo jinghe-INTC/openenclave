@@ -17,12 +17,14 @@
 #include <io.h>
 #include <stdint.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 // clang-format off
 
 #include <winsock2.h>
 #include <windows.h>
 #include <Ws2def.h>
+#include <Ws2tcpip.h>
 #include <VersionHelpers.h>
 // clang-format on
 
@@ -916,15 +918,21 @@ ssize_t oe_syscall_send_ocall(
     size_t len,
     int flags)
 {
-    ssize_t ret;
+    ssize_t ret = OE_EINVAL;
     _set_errno(0);
 
-    ret = send(_get_socket(sockfd), buf, len, flags);
+    if ((len & 0xFFFFFFFF) != len)
+    {
+        _set_errno(OE_EINVAL);
+        goto done;
+    }
+
+    ret = send(_get_socket(sockfd), buf, (int)len, flags);
     if (ret == SOCKET_ERROR)
     {
         _set_errno(_winsockerr_to_errno(WSAGetLastError()));
     }
-
+done:
     return ret;
 }
 
@@ -936,13 +944,19 @@ ssize_t oe_syscall_sendto_ocall(
     const struct oe_sockaddr* src_addr,
     oe_socklen_t addrlen)
 {
-    ssize_t ret;
+    ssize_t ret = OE_EINVAL;
     _set_errno(0);
+
+    if ((len & 0xFFFFFFFF) != len)
+    {
+        _set_errno(OE_EINVAL);
+        goto done;
+    }
 
     ret = sendto(
         _get_socket(sockfd),
         buf,
-        len,
+        (int)len,
         flags,
         (struct sockaddr*)src_addr,
         addrlen);
@@ -950,7 +964,7 @@ ssize_t oe_syscall_sendto_ocall(
     {
         _set_errno(_winsockerr_to_errno(WSAGetLastError()));
     }
-
+done:
     return ret;
 }
 
@@ -1488,13 +1502,13 @@ int oe_syscall_uname_ocall(struct oe_utsname* buf)
     // OE SDK is supported only on WindowsServer and Win10
     if (IsWindowsServer())
     {
-        sprintf(buf->sysname, "WindowsServer");
-        sprintf(buf->version, "2016OrAbove");
+        sprintf_s(buf->sysname, sizeof(buf->sysname), "WindowsServer");
+        sprintf_s(buf->version, sizeof(buf->version), "2016OrAbove");
     }
     else if (IsWindows10OrGreater())
     {
-        sprintf(buf->sysname, "Windows10OrGreater");
-        sprintf(buf->version, "10OrAbove");
+        sprintf_s(buf->sysname, sizeof(buf->sysname), "Windows10OrGreater");
+        sprintf_s(buf->version, sizeof(buf->version), "10OrAbove");
     }
 
     ret = 0;
