@@ -22,7 +22,8 @@ void Log(const char* s, uint64_t x)
 MY_FILE* Fopen(const char* filename, const char* modes)
 {
     D(printf("Fopen(filename=%s, modes=%s)\n", filename, modes);)
-    FILE* is = fopen(filename, modes);
+    FILE* is;
+    fopen_s(&is, filename, modes);
     D(printf("Fopen(): return=%p\n", is);)
     return (MY_FILE*)is;
 }
@@ -56,7 +57,7 @@ static int _get_file_check_sum(const char* path, unsigned int* checksum)
         goto done;
 
     /* Open the input file */
-    if (!(is = fopen(path, "rb")))
+    if (fopen_s(&is, path, "rb") != 0)
         goto done;
 
     size_t n;

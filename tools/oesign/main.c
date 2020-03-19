@@ -89,7 +89,7 @@ static oe_result_t _update_and_write_signed_exe(
             goto done;
         }
 
-        if (!(os = fopen(p, "wb")))
+        if (fopen_s(&os, p, "wb") != 0)
         {
             Err("failed to open: %s", p);
             goto done;
@@ -189,7 +189,7 @@ static int _load_config_file(const char* path, ConfigFileOptions* options)
     str_t rhs = STR_NULL_INIT;
     size_t line = 1;
 
-    if (!(is = fopen(path, "rb")))
+    if (fopen_s(&is, path, "rb") != 0)
         goto done;
 
     if (str_dynamic(&str, NULL, 0) != 0)
@@ -348,7 +348,7 @@ static int _load_pem_file(const char* path, void** data, size_t* size)
         goto done;
 
     /* Open the file */
-    if (!(is = fopen(path, "rb")))
+    if (fopen_s(&is, path, "rb") != 0)
         goto done;
 
     /* Read file into memory */
