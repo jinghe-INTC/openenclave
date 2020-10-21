@@ -1,0 +1,25 @@
+// Copyright (c) Open Enclave SDK contributors.
+// Licensed under the MIT License.
+
+enclave {
+    from "openenclave/edl/fcntl.edl" import *;
+#ifdef OE_SGX
+    from "openenclave/edl/sgx/platform.edl" import *;
+#else
+    from "openenclave/edl/optee/platform.edl" import *;
+#endif
+
+    trusted {
+        public void ecall_set_rdrand_engine(void);
+
+        public int ecall_schema_run_digest_tests([user_check]void* buf);
+        public int ecall_asym_tests([user_check]void* buf);
+        public int ecall_akamai_tests([user_check]void* buf);
+        public int ecall_schema_run_symmetric_encryption([user_check]void* buf);
+        public int ecall_keygen_tests([user_check]void* buf);
+    };
+
+    untrusted {
+
+    };
+};
